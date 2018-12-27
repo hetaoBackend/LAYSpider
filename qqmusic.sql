@@ -82,3 +82,16 @@ CREATE TABLE `song` (
   `SAllCom` int(32) DEFAULT NULL COMMENT '歌曲全部评论数量',
   PRIMARY KEY (`ID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- ----------------------------
+-- Table structure for salenum
+-- ----------------------------
+DROP TABLE IF EXISTS `salenum`;
+CREATE TABLE `salenum` (
+  `ID` int(32) auto_increment COMMENT '自动ID',
+  `AlbID` int(32) NOT NULL COMMENT '专辑ID',
+  `AlbName` varchar(255) NOT NULL COMMENT '专辑名称',
+  `SalNum` int(64) NOT NULL COMMENT '已售张数',
+  `CreateTime` datetime NOT NULL COMMENT '下载时间',
+  PRIMARY KEY (`ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
