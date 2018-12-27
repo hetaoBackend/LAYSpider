@@ -3,6 +3,7 @@
 import requests
 import json
 import pymysql
+import time
 
 db = pymysql.connect("localhost", "root", "12345678", "test", charset='utf8')
 
@@ -171,7 +172,7 @@ def insert_album(album_meta, album_extra, comment_total, hot_comment_total):
             VALUES ({0}, "{1}", {2},"{3}","{4}","{5}","{6}","{7}",{8},{9},"{10}",{11},{12} )"""\
                 .format(album_id, album_meta['name'], album_meta['singerid'], album_meta['singername'],\
                         album_meta['genre'], album_meta['lan'], album_meta['aDate'], album_meta['company'],\
-                        album_extra['soldcount'], int(album_extra['price'])/100, album_extra['desc'], comment_total, hot_comment_total)
+                        album_extra['soldcount'], int(album_extra['price'])/100, album_extra['desc'], hot_comment_total, comment_total)
 
     try:
         cursor.execute(sql)
@@ -231,6 +232,7 @@ def insert_comment(album_mid, album_id, comment_total):
                 db.commit()
             except:
                 db.rollback()
+        time.sleep(1)
 
 # 插入fans表
 def insert_fans(album_mid, album_id, actid):
