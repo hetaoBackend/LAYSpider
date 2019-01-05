@@ -101,6 +101,7 @@ def getAlbumRank(album_mid, actid, begin, end):
         'user-agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.3071.115 Safari/537.36',
         'referer':'https://y.qq.com/n/yqq/album/{}.html'.format(album_mid)
     }
+    print("actid:",actid)
     rankname = "uin_rank_peract_{0}|uin_rank_peract_{0}_day".format(actid)
     paramters = {
         'begin':'{}'.format(begin),
@@ -239,8 +240,10 @@ def insert_fans(album_mid, album_id, actid):
     begin = 0
     end = 24
     album_rank_info = getAlbumRank(album_mid, actid, begin, end)
-    while album_rank_info and album_rank_info['uin_rank_peract_288'] and album_rank_info['uin_rank_peract_288_day']:
-        for rank_info in album_rank_info['uin_rank_peract_288']:
+    rank_peract = "uin_rank_peract_{}".format(actid)
+    rank_peract_day = "uin_rank_peract_{}_day".format(actid)
+    while album_rank_info and album_rank_info[rank_peract] and album_rank_info[rank_peract_day]:
+        for rank_info in album_rank_info[rank_peract]:
             sql = """
                     INSERT INTO fans(FanID, AlbID, `Rank`, Label, FanName, ContriValue) \
                     VALUES ("{0}", {1}, {2},{3},"{4}",{5})"""\
@@ -252,7 +255,7 @@ def insert_fans(album_mid, album_id, actid):
                 db.commit()
             except:
                 db.rollback()
-        for rank_info in album_rank_info['uin_rank_peract_288_day']:
+        for rank_info in album_rank_info[rank_peract_day]:
             sql = """
                     INSERT INTO fans(FanID, AlbID, `Rank`, Label, FanName, ContriValue) \
                     VALUES ("{0}", {1}, {2},{3},"{4}",{5})"""\
@@ -264,7 +267,7 @@ def insert_fans(album_mid, album_id, actid):
                 db.commit()
             except:
                 db.rollback()
-        if len(album_rank_info['uin_rank_peract_288']) < 25 and len(album_rank_info['uin_rank_peract_288_day']) < 25:
+        if len(album_rank_info[rank_peract]) < 25 and len(album_rank_info[rank_peract_day]) < 25:
             break
         begin += 25
         end += 25
@@ -281,11 +284,13 @@ if __name__ == "__main__":
         raise RuntimeError('illegal url')
     cursor = db.cursor()
     album_meta = getAlbumInfo(album_mid)
+    actid = ""
     if 'id' in album_meta:
         album_id = album_meta['id']
         album_extra = getAlbumExtra(album_mid, album_id)
         album_acturl = getActURL(album_mid, album_id)
-        actid = album_acturl['actid']
+        if album_acturl and 'actid' in album_acturl:
+            actid = album_acturl['actid']
         album_comment_info = getCommentInfo('album', album_mid, album_id, 0, "")
         if 'comment' in album_comment_info:
             comment_total = album_comment_info['comment']['commenttotal']
@@ -298,9 +303,10 @@ if __name__ == "__main__":
     print("--finsh inserting album table--")
     #-------------------------------------------#
     # start fans table
-    print("--start inserting fans table--")
-    insert_fans(album_mid, album_id, actid)
-    print("--finish inserting fans table--")
+    if actid != "":
+        print("--start inserting fans table--")
+        insert_fans(album_mid, album_id, actid)
+        print("--finish inserting fans table--")
     #-------------------------------------------#
     # start song table
     print("--start inserting song table--")
